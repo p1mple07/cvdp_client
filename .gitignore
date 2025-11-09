@@ -1,14 +1,64 @@
+# Virtual Environment
+cvdp_env/
+venv/
+ENV/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Environment files
+.env
+
+# Test outputs and results - large files
 cvdp_*
 *.json
 *.jsonl
 !/example_dataset/*.jsonl
 *.log
-__pycache__
-/.env
-/custom_factory
+
+# Result directories
 work*/
 work_*.txt
 /dataset_analysis*
 /refinement_analysis*
 /failure_analysis*/
 /model_sweep_results*
+deep-test*/
+deep-test-*/
+deepseek-*/
+jamba-*/
+nemotron-*/
+phi35-*/
+smollm-*/
+gpt4o_*/
+gptoss-*/
+*-test/
+*-full/
+*-agentic*/
+iterative-*/
+react_*/
+test-*/
+slm-*/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Keep example datasets for documentation
+!example_dataset/
