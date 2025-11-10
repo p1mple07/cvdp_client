@@ -190,6 +190,7 @@ ERRORS DETECTED:
 ```
 
 ERROR CATEGORY: {error_category}
+{test_context}
 
 INSTRUCTIONS:
 - ANALYZE: Identify root cause of each error
@@ -203,6 +204,7 @@ CRITICAL INSTRUCTIONS:
 - Do NOT include explanations or reasoning text
 - Start your response immediately with "module"
 - Do NOT write analysis or thinking steps before the code
+- If test code is provided, ensure your implementation matches test expectations
 
 GENERATE THE FIXED MODULE CODE NOW:"""
 

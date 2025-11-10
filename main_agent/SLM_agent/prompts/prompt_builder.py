@@ -84,13 +84,17 @@ class PromptBuilder:
         Returns:
             Formatted refinement prompt
         """
+        # Try to load test files for functional errors
+        test_context = self._get_test_context_if_available(errors, error_category)
+        
         prompt = REFINEMENT_TEMPLATE.format(
             system_prompt=SYSTEM_PROMPT,
             task_description=task,
             previous_code=previous_code,
             error_messages=errors,
             error_category=error_category,
-            iteration=iteration
+            iteration=iteration,
+            test_context=test_context
         )
         
         logger.info(f"Built refinement prompt: {len(prompt)} chars")
@@ -198,3 +202,55 @@ class PromptBuilder:
         
         logger.info(f"Selected {len(selected)} few-shot examples")
         return "\nDESIGN PATTERNS:\n" + "\n".join(selected)
+    
+    def _get_test_context_if_available(self, errors: str, error_category: str) -> str:
+        """
+        Load test file content if errors indicate functional test failures
+        
+        Args:
+            errors: Error messages from test execution
+            error_category: Category of error
+            
+        Returns:
+            Formatted test context or empty string
+        """
+        from pathlib import Path
+        
+        # Check if this is a functional test failure (not compilation)
+        if error_category in ["syntax", "undeclared", "type", "width"]:
+            return ""  # Compilation errors don't need test code
+        
+        # Look for assertion errors or test failures
+        if not any(kw in errors.lower() for kw in ["assert", "test case", "failed", "expected"]):
+            return ""
+        
+        # Try to find test files in common locations
+        test_paths = [
+            Path("/code/verif"),
+            Path("/code/src"),
+            Path("/code/../src"),
+        ]
+        
+        test_content = []
+        for test_dir in test_paths:
+            if not test_dir.exists():
+                continue
+                
+            # Find test files (CocoTB or testbench)
+            test_files = list(test_dir.glob("test_*.py")) + list(test_dir.glob("*_tb.sv")) + list(test_dir.glob("*_tb.v"))
+            
+            for test_file in test_files[:2]:  # Limit to 2 test files
+                try:
+                    content = test_file.read_text()
+                    # Truncate if too long
+                    if len(content) > 3000:
+                        content = content[:3000] + "\n... (truncated)"
+                    test_content.append(f"\nTEST FILE: {test_file.name}\n```python\n{content}\n```")
+                except:
+                    pass
+        
+        if test_content:
+            logger.info(f"  Added {len(test_content)} test file(s) to refinement context")
+            return "\n\nTEST CODE FOR REFERENCE:\n" + "\n".join(test_content)
+        
+        return ""

@@ -66,19 +66,26 @@ class LintRunner:
             # Check if there are actual syntax/compilation errors (not just warnings)
             # Verilator outputs "%Error: syntax error" for real errors
             # But "%Error: Exiting due to N warning(s)" is just a summary of warnings
+            # We only want to fail on actual compilation errors, not warnings
             has_real_errors = False
+            
             for line in output.split('\n'):
                 if '%Error:' in line:
                     # Check if it's a real error or just the warnings summary
                     if 'Exiting due to' not in line and 'warning(s)' not in line.lower():
-                        has_real_errors = True
-                        break
+                        # Check if it's an actual compilation error (not a warning)
+                        # Real errors have messages like "syntax error", "not declared", etc.
+                        # Warnings have error codes like "%Error-ASSIGNIN", "%Error-WIDTH", etc.
+                        if '%Error-' not in line:
+                            # No error code means it's a real compilation error
+                            has_real_errors = True
+                            break
             
             if result.returncode == 0:
                 logger.info("Verilator lint checks PASSED")
                 return True, ""
             elif not has_real_errors:
-                # Only warnings, no real compilation errors - treat as success
+                # Only warnings (with error codes like %Error-XXX), no real compilation errors
                 logger.info("Verilator has warnings but no compilation errors - treating as PASSED")
                 logger.info(f"Warnings: {output[:500]}")  # Log first 500 chars of warnings
                 return True, ""

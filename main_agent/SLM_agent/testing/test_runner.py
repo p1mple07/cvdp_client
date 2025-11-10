@@ -33,7 +33,7 @@ class TestRunner:
         """
         logger.info("Starting test execution...")
 
-        # First check if code compiles
+        # Step 1: Check if code compiles
         logger.info("Step 1: Checking if code compiles...")
         lint_success, lint_errors = self._run_lint_checks()
         
@@ -45,20 +45,23 @@ class TestRunner:
         # Compilation succeeded (possibly with warnings)
         logger.info("Code compiles successfully!")
         
-        # Now try to run actual testbench if available
-        rundir = Path("/code/rundir")
+        # Step 2: Try to run actual testbench if available
+        logger.info("Step 2: Checking for testbench...")
+        cocotb_success, cocotb_errors = self.cocotb_runner.run()
         
-        # Check if there's a pytest-based test
-        if (rundir / "../harness").exists() or Path("/src/test_runner.py").exists():
-            logger.info("Step 2: Running actual testbench tests...")
-            # Check if CocoTB tests are available
-            cocotb_success, cocotb_errors = self.cocotb_runner.run()
-            if cocotb_errors or cocotb_success is not None:  # CocoTB tests were found and executed
-                return cocotb_success, cocotb_errors
-        
-        # No testbench available, compilation success is enough
-        logger.info("No testbench found, compilation success is sufficient")
-        return True, ""
+        if cocotb_success is None:
+            # No testbench available
+            logger.info("No testbench found, compilation success is sufficient")
+            return True, ""
+        elif cocotb_success:
+            # Testbench passed!
+            logger.info("✅ Testbench tests PASSED!")
+            return True, ""
+        else:
+            # Testbench failed
+            logger.warning("❌ Testbench tests FAILED")
+            logger.warning(f"Errors:\n{cocotb_errors[:500]}")
+            return False, cocotb_errors
     
     def _run_lint_checks(self) -> Tuple[bool, str]:
         """Run lint checks on RTL files"""

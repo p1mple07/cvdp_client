@@ -11,7 +11,7 @@ def main():
     # Custom configuration
     # Config class get os.getenv variables if set
     config = AgentConfig(
-        max_iterations=5,
+        max_iterations=3,
         # slm_model will be read from ENV variable
         enable_port_validation=True,
         use_few_shot_examples=True

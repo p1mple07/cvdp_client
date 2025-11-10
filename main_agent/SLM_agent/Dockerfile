@@ -47,8 +47,8 @@ ENV PYTHONPATH=/app
 # Set environment variables for Jamba model
 ENV SLM_API_URL=http://host.docker.internal:8000
 ENV SLM_MODEL=jamba
-ENV SLM_MAX_LENGTH=8192
-ENV SLM_TIMEOUT=3000
+ENV SLM_MAX_LENGTH=262143
+ENV SLM_TIMEOUT=30000
 
 # Set the entrypoint
 ENTRYPOINT ["python3", "/app/main.py"]
