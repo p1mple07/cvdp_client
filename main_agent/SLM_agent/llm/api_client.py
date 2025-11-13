@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class SLMAPIClient:
     """Interface to Small Language Model API"""
     
-    def __init__(self, api_url: str, model: str, max_length: int, timeout: int):
+    def __init__(self, api_url: str, model: str, max_length: int, timeout: int, temperature: float = 0.3):
         """
         Initialize SLM API client
         
@@ -20,28 +20,32 @@ class SLMAPIClient:
             model: Model name/identifier
             max_length: Maximum generation length
             timeout: Request timeout in seconds
+            temperature: Default sampling temperature
         """
         self.api_url = api_url
         self.model = model
         self.max_length = max_length
         self.timeout = timeout
+        self.temperature = temperature
         
         logger.info(f"Initialized SLM API Client")
         logger.info(f"  URL: {api_url}")
         logger.info(f"  Model: {model}")
         logger.info(f"  Max length: {max_length}")
     
-    def generate(self, prompt: str, temperature: float = 0.7) -> Optional[str]:
+    def generate(self, prompt: str, temperature: float = None) -> Optional[str]:
         """
         Generate code using SLM API
         
         Args:
             prompt: Input prompt with TASK, REQUIREMENTS, etc.
-            temperature: Sampling temperature (0.0-1.0)
+            temperature: Sampling temperature (uses default if None)
             
         Returns:
             Generated text or None on failure
         """
+        if temperature is None:
+            temperature = self.temperature
         try:
             payload = {
                 "prompt": prompt,

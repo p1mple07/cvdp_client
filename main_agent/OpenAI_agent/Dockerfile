@@ -10,8 +10,8 @@ RUN apt-get update && \
         python3-requests \
     && rm -rf /var/lib/apt/lists/*
 
-# Install requests library for API calls
-RUN pip3 install --no-cache-dir requests
+# Install OpenAI library for API calls
+RUN pip3 install --no-cache-dir openai
 
 # Create /code directory for mounted volumes
 RUN mkdir -p /code && chmod 777 /code
@@ -44,11 +44,11 @@ RUN chmod +x /app/main.py
 # Set Python path to find modules
 ENV PYTHONPATH=/app
 
-# Set environment variables for SmolLM model
-ENV SLM_API_URL=http://host.docker.internal:8000
-ENV SLM_MODEL=smollm
-ENV SLM_MAX_LENGTH=20480
-ENV SLM_TIMEOUT=600
+# Set environment variables for OpenAI
+ENV OPENAI_MODEL=gpt-4o-mini
+ENV OPENAI_MAX_TOKENS=16000
+ENV OPENAI_TIMEOUT=300
+# OPENAI_API_KEY will be passed at runtime
 
 # Set the entrypoint
 ENTRYPOINT ["python3", "/app/main.py"]

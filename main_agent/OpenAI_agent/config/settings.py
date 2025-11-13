@@ -14,11 +14,11 @@ class AgentConfig:
     max_iterations: int = 3
     early_exit_on_success: bool = False
     
-    # SLM API settings
-    slm_api_url: str = field(default_factory=lambda: os.getenv("SLM_API_URL", "http://host.docker.internal:8000"))
-    slm_model: str = field(default_factory=lambda: os.getenv("SLM_MODEL", "phi"))
-    slm_max_length: int = field(default_factory=lambda: int(os.getenv("SLM_MAX_LENGTH", "32000")))
-    slm_timeout: int = field(default_factory=lambda: int(os.getenv("SLM_TIMEOUT", "300")))
+    # OpenAI API settings
+    slm_api_url: str = field(default_factory=lambda: os.getenv("OPENAI_API_URL", "https://api.openai.com"))
+    slm_model: str = field(default_factory=lambda: os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
+    slm_max_length: int = field(default_factory=lambda: int(os.getenv("OPENAI_MAX_TOKENS", "16000")))
+    slm_timeout: int = field(default_factory=lambda: int(os.getenv("OPENAI_TIMEOUT", "300")))
     
     # Prompt engineering settings
     use_few_shot_examples: bool = True
