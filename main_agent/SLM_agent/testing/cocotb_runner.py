@@ -54,13 +54,30 @@ class CocotbRunner:
             import glob
             test_env = os.environ.copy()
             
-            # Find all Verilog/SystemVerilog files in rtl directory
-            rtl_files = glob.glob("/code/rtl/*.sv") + glob.glob("/code/rtl/*.v")
+            # Find all Verilog/SystemVerilog files in rtl directory with comprehensive search
+            rtl_files = []
+            rtl_patterns = [
+                "/code/rtl/*.sv",
+                "/code/rtl/*.v",
+                "/code/rtl/**/*.sv",
+                "/code/rtl/**/*.v"
+            ]
+            
+            for pattern in rtl_patterns:
+                found = glob.glob(pattern, recursive=True)
+                if found:
+                    rtl_files.extend(found)
+                    logger.info(f"Found RTL files with pattern {pattern}: {found}")
+            
+            # Remove duplicates
+            rtl_files = list(set(rtl_files))
+            
             if rtl_files:
                 test_env["VERILOG_SOURCES"] = " ".join(rtl_files)
                 # Extract module name from first file (filename without extension)
                 module_name = Path(rtl_files[0]).stem
                 test_env["TOPLEVEL"] = module_name
+                logger.info(f"Set TOPLEVEL={module_name} from {rtl_files[0]}")
             else:
                 logger.warning("No RTL files found in /code/rtl/")
                 return False, "No RTL files found"
@@ -68,17 +85,32 @@ class CocotbRunner:
             test_env["TOPLEVEL_LANG"] = "verilog"
             test_env["SIM"] = "icarus"
             
-            # Find Python test module in verif or src directory
-            test_module_files = glob.glob("/code/verif/test_*.py") + glob.glob("/code/src/test_*.py")
+            # Find Python test module in verif or src directory with more thorough search
+            test_module_files = []
+            search_patterns = [
+                "/code/verif/test_*.py",
+                "/code/src/test_*.py",
+                "/code/verif/*_tb.py",
+                "/code/src/*_tb.py",
+                "/code/verif/*.py",
+                "/code/src/*.py"
+            ]
+            
+            for pattern in search_patterns:
+                found = glob.glob(pattern)
+                if found:
+                    test_module_files.extend(found)
+                    logger.info(f"Found test files with pattern {pattern}: {found}")
+            
             if test_module_files:
                 # Use first test_*.py file without extension as module name
                 test_module = Path(test_module_files[0]).stem
                 test_env["MODULE"] = test_module
-                logger.info(f"Set MODULE={test_module}")
+                logger.info(f"Set MODULE={test_module} from {test_module_files[0]}")
             else:
                 # Fallback: use toplevel name as module name
-                test_env["MODULE"] = module_name
-                logger.warning(f"No test_*.py module found, using MODULE={module_name}")
+                test_env["MODULE"] = f"test_{module_name}"
+                logger.warning(f"No test module found, using MODULE=test_{module_name}")
             
             logger.info(f"Set VERILOG_SOURCES={test_env['VERILOG_SOURCES']}")
             logger.info(f"Set TOPLEVEL={test_env['TOPLEVEL']}")
