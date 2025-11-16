@@ -12,6 +12,7 @@ RUN apt-get update && \
 
 # Install requests library for API calls
 RUN pip3 install --no-cache-dir requests
+RUN pip3 install --no-cache-dir python-dotenv
 
 # Create /code directory for mounted volumes
 RUN mkdir -p /code && chmod 777 /code

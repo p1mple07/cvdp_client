@@ -148,7 +148,7 @@ class CocotbRunner:
                     error_lines = output.split("\n")[-100:]
                 
                 errors = "\n".join(error_lines)
-                return False, errors
+                return False, output
                 
         except subprocess.TimeoutExpired:
             logger.error(f"⏱️ CocoTB tests timeout after {self.timeout}s")

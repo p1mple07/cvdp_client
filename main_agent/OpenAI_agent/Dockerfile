@@ -12,6 +12,7 @@ RUN apt-get update && \
 
 # Install OpenAI library for API calls
 RUN pip3 install --no-cache-dir openai
+RUN pip3 install --no-cache-dir python-dotenv
 
 # Create /code directory for mounted volumes
 RUN mkdir -p /code && chmod 777 /code
