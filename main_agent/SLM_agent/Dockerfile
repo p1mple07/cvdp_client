@@ -44,10 +44,10 @@ RUN chmod +x /app/main.py
 # Set Python path to find modules
 ENV PYTHONPATH=/app
 
-# Set environment variables for SmolLM model
+# Set environment variables for Jamba model
 ENV SLM_API_URL=http://host.docker.internal:8000
-ENV SLM_MODEL=smollm
-ENV SLM_MAX_LENGTH=20480
+ENV SLM_MODEL=jamba
+ENV SLM_MAX_LENGTH=32000
 ENV SLM_TIMEOUT=600
 
 # Set the entrypoint

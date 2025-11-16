@@ -46,8 +46,7 @@ class CocotbRunner:
                     break
             
             if not test_file:
-                logger.info("ℹ️ CocoTB tests not available (test_runner.py not found)")
-                return None, ""
+                logger.warning("test_runner.py not found in standard locations, will search for test modules")
             
             # Set up environment variables for CocoTB
             import os

@@ -3,14 +3,45 @@
 
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Dict, Optional
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
 
 class CodeManager:
     """Manage HDL code files and context"""
+    
+    def __init__(self):
+        """Initialize CodeManager and load environment variables"""
+        # Load environment variables from /code/src/.env if it exists
+        env_file = Path("/code/src/.env")
+        if env_file.exists():
+            load_dotenv(env_file)
+            logger.info(f"Loaded environment variables from {env_file}")
+        else:
+            logger.warning(f"Environment file not found: {env_file}")
+    
+    def get_expected_filename(self) -> str:
+        """
+        Get the expected filename based on TOPLEVEL environment variable
+        
+        Returns:
+            Expected filename with .sv extension
+        """
+        # Try to get TOPLEVEL from environment
+        toplevel = os.getenv("TOPLEVEL")
+        if toplevel:
+            # Use the TOPLEVEL name with .sv extension
+            expected_filename = f"{toplevel}.sv"
+            logger.info(f"Expected filename from TOPLEVEL env var: {expected_filename}")
+            return expected_filename
+        else:
+            # Fallback to default
+            logger.warning("TOPLEVEL environment variable not set, using default 'top.sv'")
+            return "top.sv"
     
     def read_prompt(self, prompt_file: str = "/code/prompt.json") -> str:
         """
@@ -100,27 +131,16 @@ class CodeManager:
                 logger.info(f"Found empty target file: {file_path}")
                 return file_path
         
-        # Strategy 2: Look for common top-level names
-        common_names = ["top.sv", "top.v", "top_module.sv", "top_module.v", "design.sv", "design.v"]
-        for name in common_names:
-            path = rtl_path / name
-            if not path.exists():
-                logger.info(f"Will create target file: {path}")
-                return path
+        # Strategy 2: Use expected filename based on TOPLEVEL environment variable
+        expected_filename = self.get_expected_filename()
+        expected_path = rtl_path / expected_filename
         
-        # Strategy 3: Use first .sv or .v file
-        for file_path in rtl_path.glob("*.sv"):
-            logger.info(f"Using existing file: {file_path}")
-            return file_path
-        
-        for file_path in rtl_path.glob("*.v"):
-            logger.info(f"Using existing file: {file_path}")
-            return file_path
-        
-        # Default: create top.sv
-        default_path = rtl_path / "top.sv"
-        logger.info(f"Using default: {default_path}")
-        return default_path
+        if not expected_path.exists():
+            logger.info(f"Will create target file based on TOPLEVEL: {expected_path}")
+            return expected_path
+        else:
+            logger.info(f"Using existing file based on TOPLEVEL: {expected_path}")
+            return expected_path
     
     def write_code(self, file_path: Path, code: str) -> bool:
         """
@@ -172,3 +192,4 @@ class CodeManager:
         except Exception as e:
             logger.warning(f"Could not create backup: {e}")
             return False
+

@@ -232,7 +232,21 @@ class Repository:
                 license_network_name = config.get('LICENSE_NETWORK')
                 if license_network_name:
                     content = add_license_network_to_docker_compose(content, license_network_name)
+                    
+            if file.endswith('test_runner.py'):
+                # Replace cocotb_tools.runner import with cocotb.runner
+                if 'from cocotb_tools.runner import get_runner' in content:
+                    print(f"Info: Converting test_runner.py cocotb import compatibility in issue '{self.name}' (id {self.id})")
+                    content = self._convert_test_runner_to_cocotb19(content)
+                    
                            
+            # Fix cocotb import compatibility in test_runner.py files
+            if file.endswith('test_runner.py'):
+                # Replace cocotb_tools.runner import with cocotb.runner
+                if 'from cocotb.runner import get_runner' in content:
+                    print(f"Info: Converting test_runner.py cocotb import compatibility in issue '{self.name}' (id {self.id})")
+                    content = self._convert_test_runner_to_cocotb19(content)
+                    
             # Filter out rundir volumes from docker-compose.yml
             if file.endswith('docker-compose.yml'):
                 
@@ -269,6 +283,26 @@ class Repository:
                     print(f"Error processing docker-compose.yml: {str(e)}")
 
             self.write_file(f"harness/{self.id}/{file}", content)
+
+    # ----------------------------------------
+    # - Cocotb Compatibility Helper
+    # ----------------------------------------
+    
+    def _convert_test_runner_to_cocotb19(self, content):
+        """
+        Convert test_runner.py content from cocotb_tools.runner to cocotb.runner.
+        
+        Args:
+            content: Original test_runner.py content with cocotb_tools.runner import
+            
+        Returns:
+            Modified content with cocotb.runner import
+        """
+        # Simple fix: replace the problematic import
+        content = content.replace('from cocotb.runner import get_runner', 
+                                'from cocotb_tools.runner import get_runner')
+        
+        return content
 
     def try_create_dir(self, path):
 

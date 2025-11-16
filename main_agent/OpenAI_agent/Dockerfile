@@ -46,7 +46,7 @@ ENV PYTHONPATH=/app
 
 # Set environment variables for OpenAI
 ENV OPENAI_MODEL=gpt-4o-mini
-ENV OPENAI_MAX_TOKENS=16000
+ENV OPENAI_MAX_TOKENS=32000
 ENV OPENAI_TIMEOUT=300
 # OPENAI_API_KEY will be passed at runtime
 

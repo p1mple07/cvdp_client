@@ -846,7 +846,7 @@ class JambaModel:
                 processed_prompt,
                 return_tensors="pt",
                 truncation=True,
-                max_length=4096,  # Jamba context window
+                max_length=16384,  # Jamba context window (16k)
                 padding=False
             ).to(self.device)
             
