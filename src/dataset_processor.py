@@ -963,33 +963,10 @@ When generating files, return the file name in the correct place at the folder s
     def all_prepare(self, model : OpenAI_Instance = None):
         from .parallel_executor import ParallelExecutor
         
-        # Filter out already completed datapoints if skip_completed is enabled
-        items_to_process = list(self.context.keys())
-        
-        if hasattr(self, 'skip_completed') and self.skip_completed:
-            skipped = []
-            for id in list(items_to_process):
-                # Check if agent output exists
-                agent_output_path = os.path.join(self.prefix, f"cvdp_{'_'.join(id.split('_')[1:-1])}", "reports", "1_agent.txt")
-                if os.path.exists(agent_output_path):
-                    skipped.append(id)
-                    items_to_process.remove(id)
-                    print(f"Skipping {id} - already has agent output")
-            
-            if skipped:
-                print(f"\n{'='*80}")
-                print(f"RESUME MODE: Skipped {len(skipped)} completed datapoints")
-                print(f"Processing remaining {len(items_to_process)} datapoints")
-                print(f"{'='*80}\n")
-        
-        if not items_to_process:
-            print("All datapoints already completed!")
-            return
-        
         executor = ParallelExecutor(num_workers=self.threads, phase_name="Preparation")
         executor.execute_parallel_simple(
             task_func=self.th_prepare,
-            items=items_to_process,
+            items=list(self.context.keys()),
             task_args=[model]
         )
 
@@ -1067,14 +1044,13 @@ When generating files, return the file name in the correct place at the folder s
         return result
 
 class CopilotProcessor (DatasetProcessor):
-    def __init__(self, filename : str = "", golden : bool = True, threads : int = 1, debug = False, host = False, prefix : str = None, network_name=None, manage_network=True, include_golden_patch=False, include_harness=False, refine_model=None, skip_completed=False):
+    def __init__(self, filename : str = "", golden : bool = True, threads : int = 1, debug = False, host = False, prefix : str = None, network_name=None, manage_network=True, include_golden_patch=False, include_harness=False, refine_model=None):
         super().__init__(filename, golden, threads, debug, host, prefix, network_name, manage_network)
         self.include_golden_patch = include_golden_patch
         self.include_harness = include_harness
         self.refined_datapoints = {}
         self.refined_filename = None
         self.refine_model = refine_model
-        self.skip_completed = skip_completed
 
     def get_context_for_repo(self, id, model):
         """
@@ -1472,7 +1448,7 @@ class AgenticProcessor (DatasetProcessor):
     # - Process JSON File
     # ----------------------------------------
 
-    def __init__(self, filename : str, golden : bool = True, threads : int = 1, debug = False, host = False, prefix : str = None, network_name=None, manage_network=True, skip_completed=False):
+    def __init__(self, filename : str, golden : bool = True, threads : int = 1, debug = False, host = False, prefix : str = None, network_name=None, manage_network=True):
         super().__init__(filename, golden, threads, debug, host, prefix, network_name, manage_network)
         self.agent_results = {}
         # Directory size monitor
@@ -1480,7 +1456,6 @@ class AgenticProcessor (DatasetProcessor):
         # Initialize include flags to False by default
         self.include_golden_patch = False
         self.include_harness = False
-        self.skip_completed = skip_completed
 
         # Ensure patch_image Docker image exists for agentic heavy processing
         result = subprocess.run(["docker", "images", "-q", "patch_image"],
