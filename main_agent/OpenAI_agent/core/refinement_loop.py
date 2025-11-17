@@ -116,15 +116,9 @@ class RefinementLoop:
             print(self.code)
             print("=" * 80 + "\n")
             
-            # On first iteration, determine the correct target file based on module name
-            if self.iteration == 1:
-                module_name = self.response_parser.extract_module_name(self.code)
-                if module_name:
-                    # Update target file to use module name
-                    new_target = target_file.parent / f"{module_name}.sv"
-                    if new_target != target_file:
-                        logger.info(f"Updating target file from {target_file} to {new_target} based on module name")
-                        target_file = new_target
+            # Always use the target file from TOPLEVEL environment variable
+            # Do not rename based on module name to avoid mismatches
+            # LLM is responsible for generating correct module name - do not fix it
             
             # Write code
             if not self.code_manager.write_code(target_file, self.code):
