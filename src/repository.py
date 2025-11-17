@@ -962,6 +962,17 @@ class Repository:
             with open(docker, 'r') as f:
                 data = yaml.safe_load(f)
 
+            # Upgrade cocotb in harness containers before running tests
+            for service_name, service_config in data.get('services', {}).items():
+                if 'command' in service_config:
+                    original_cmd = service_config['command']
+                    if isinstance(original_cmd, str):
+                        service_config['command'] = f"sh -c 'pip3 install --upgrade --no-cache-dir \"cocotb==1.9.2\" 2>/dev/null || true; {original_cmd}'"
+            
+            # Write modified docker-compose back
+            with open(docker, 'w') as f:
+                yaml.safe_dump(data, f)
+
             results = []
 
             # Identify services
