@@ -13,6 +13,7 @@ RUN apt-get update && \
 # Install requests library for API calls
 RUN pip3 install --no-cache-dir requests
 RUN pip3 install --no-cache-dir python-dotenv
+RUN pip3 install --no-cache-dir "cocotb==1.9.*"
 
 # Create /code directory for mounted volumes
 RUN mkdir -p /code && chmod 777 /code
@@ -45,10 +46,10 @@ RUN chmod +x /app/main.py
 # Set Python path to find modules
 ENV PYTHONPATH=/app
 
-# Set environment variables for Jamba model
+# Set environment variables for Nemotron model
 ENV SLM_API_URL=http://host.docker.internal:8000
-ENV SLM_MODEL=jamba
-ENV SLM_MAX_LENGTH=32000
+ENV SLM_MODEL=nemotron
+ENV SLM_MAX_LENGTH=4096
 ENV SLM_TIMEOUT=600
 
 # Set the entrypoint
