@@ -13,7 +13,7 @@ RUN apt-get update && \
 # Install requests library for API calls
 RUN pip3 install --no-cache-dir requests
 RUN pip3 install --no-cache-dir python-dotenv
-RUN pip3 install --no-cache-dir "cocotb==1.9.*"
+RUN pip3 install --no-cache-dir "cocotb==1.9.2"
 
 # Create /code directory for mounted volumes
 RUN mkdir -p /code && chmod 777 /code
