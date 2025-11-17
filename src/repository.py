@@ -239,14 +239,6 @@ class Repository:
                     print(f"Info: Converting test_runner.py cocotb import compatibility in issue '{self.name}' (id {self.id})")
                     content = self._convert_test_runner_to_cocotb19(content)
                     
-                           
-            # Fix cocotb import compatibility in test_runner.py files
-            if file.endswith('test_runner.py'):
-                # Replace cocotb_tools.runner import with cocotb.runner
-                if 'from cocotb.runner import get_runner' in content:
-                    print(f"Info: Converting test_runner.py cocotb import compatibility in issue '{self.name}' (id {self.id})")
-                    content = self._convert_test_runner_to_cocotb19(content)
-                    
             # Filter out rundir volumes from docker-compose.yml
             if file.endswith('docker-compose.yml'):
                 
@@ -299,8 +291,8 @@ class Repository:
             Modified content with cocotb.runner import
         """
         # Simple fix: replace the problematic import
-        content = content.replace('from cocotb.runner import get_runner', 
-                                'from cocotb_tools.runner import get_runner')
+        content = content.replace('from cocotb_tools.runner import get_runner', 
+                                'from cocotb.runner import get_runner')
         
         return content
 
