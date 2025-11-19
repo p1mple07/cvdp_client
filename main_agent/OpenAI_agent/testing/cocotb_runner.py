@@ -84,32 +84,16 @@ class CocotbRunner:
             test_env["TOPLEVEL_LANG"] = "verilog"
             test_env["SIM"] = "icarus"
             
-            # Find Python test module in verif or src directory with more thorough search
-            test_module_files = []
-            search_paths = [
-                "/code/verif/test_*.py",
-                "/code/src/test_*.py",
-                "/code/verif/*_tb.py",
-                "/code/src/*_tb.py",
-                "/code/verif/*.py",
-                "/code/src/*.py"
-            ]
+            # Check if MODULE is already in environment (loaded from .env by main agent)
+            module_from_env = os.environ.get('MODULE')
             
-            for pattern in search_paths:
-                found = glob.glob(pattern)
-                if found:
-                    test_module_files.extend(found)
-                    logger.info(f"Found test files with pattern {pattern}: {found}")
-            
-            if test_module_files:
-                # Use first test_*.py file without extension as module name
-                test_module = Path(test_module_files[0]).stem
-                test_env["MODULE"] = test_module
-                logger.info(f"Set MODULE={test_module} from {test_module_files[0]}")
+            if module_from_env:
+                test_env["MODULE"] = module_from_env
+                logger.info(f"Using MODULE={module_from_env} from environment")
             else:
                 # Fallback: use toplevel name as module name
                 test_env["MODULE"] = f"test_{module_name}"
-                logger.warning(f"No test module found, using MODULE=test_{module_name}")
+                logger.warning(f"No MODULE in environment, using MODULE=test_{module_name}")
             
             logger.info(f"Set VERILOG_SOURCES={test_env['VERILOG_SOURCES']}")
             logger.info(f"Set TOPLEVEL={test_env['TOPLEVEL']}")
